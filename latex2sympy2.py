@@ -784,9 +784,9 @@ def convert_frac(frac):
     if expr_top.is_Matrix or expr_bot.is_Matrix:
         return sympy.MatMul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=False)
     else:
-        res = sympy.Mul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=False)
-        print(f"res in convert_frac: {res}")
-        return sympy.Mul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=False)
+        # make evaluate `True` to simplify the expression.
+        # if `False`, 1 / cos(x)**2 can not be matched to a pattern.
+        return sympy.Mul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=True)
 
 
 def convert_binom(binom):
