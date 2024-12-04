@@ -780,7 +780,6 @@ def convert_frac(frac):
     expr_top = convert_expr(frac.upper)
     expr_bot = convert_expr(frac.lower)
 
-    print("Go")
     if expr_top.is_Matrix or expr_bot.is_Matrix:
         return sympy.MatMul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=False)
     else:
