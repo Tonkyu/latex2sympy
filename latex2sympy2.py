@@ -782,7 +782,7 @@ def convert_frac(frac):
     if expr_top.is_Matrix or expr_bot.is_Matrix:
         return sympy.MatMul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=False)
     else:
-        return sympy.Mul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=False)
+        return sympy.Mul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=True)
 
 
 def convert_binom(binom):
