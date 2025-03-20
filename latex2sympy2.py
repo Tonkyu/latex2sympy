@@ -23,8 +23,8 @@ is_real = None
 
 frac_type = r'\frac'
 
-variances = {}
-var = {}
+latex2sympy2_variances = {}
+latex2sympy2_var = {}
 
 VARIABLE_VALUES = {}
 
@@ -35,12 +35,12 @@ def set_real(value):
 
 
 def set_variances(vars):
-    global variances
-    variances = vars
-    global var
-    var = {}
+    global latex2sympy2_variances
+    latex2sympy2_variances = vars
+    global latex2sympy2_var
+    latex2sympy2_var = {}
     for variance in vars:
-        var[str(variance)] = vars[variance]
+        latex2sympy2_var[str(variance)] = vars[variance]
 
 
 def latex2sympy(sympy: str, variable_values={}):
@@ -161,8 +161,8 @@ def convert_relation(rel):
         # !Use Global variances
         if lh.is_Symbol:
             # set value
-            variances[lh] = rh
-            var[str(lh)] = rh
+            latex2sympy2_variances[lh] = rh
+            latex2sympy2_var[str(lh)] = rh
             return rh
         else:
             # find the symbols in lh - rh
@@ -183,13 +183,13 @@ def convert_relation(rel):
         if hasattr(rh, 'is_Pow') and rh.is_Pow and hasattr(rh.exp, 'is_Mul'):
             n = rh.exp.args[0]
             m = rh.exp.args[1]
-            if n in variances:
-                n = variances[n]
-            if m in variances:
-                m = variances[m]
+            if n in latex2sympy2_variances:
+                n = latex2sympy2_variances[n]
+            if m in latex2sympy2_variances:
+                m = latex2sympy2_variances[m]
             rh = sympy.MatrixSymbol(lh, n, m)
-            variances[lh] = rh
-            var[str(lh)] = rh
+            latex2sympy2_variances[lh] = rh
+            latex2sympy2_var[str(lh)] = rh
         else:
             raise Exception("Don't support this form of definition of matrix symbol.")
         return lh
@@ -582,7 +582,7 @@ def convert_comp(comp):
         return convert_matrix(comp.matrix())
     elif comp.det():
         # !Use Global variances
-        return convert_matrix(comp.det()).subs(variances).det()
+        return convert_matrix(comp.det()).subs(latex2sympy2_variances).det()
     elif comp.func():
         return convert_func(comp.func())
 
@@ -639,13 +639,13 @@ def convert_atom(atom):
         atom_symbol = sympy.Symbol(atom_text + subscript_text, real=is_real)
         # for matrix symbol
         matrix_symbol = None
-        global var
-        if atom_text + subscript_text in var:
+        global latex2sympy2_var
+        if atom_text + subscript_text in latex2sympy2_var:
             try:
-                rh = var[atom_text + subscript_text]
+                rh = latex2sympy2_var[atom_text + subscript_text]
                 shape = sympy.shape(rh)
                 matrix_symbol = sympy.MatrixSymbol(atom_text + subscript_text, shape[0], shape[1])
-                variances[matrix_symbol] = variances[atom_symbol]
+                latex2sympy2_variances[matrix_symbol] = latex2sympy2_variances[atom_symbol]
             except:
                 pass
 
@@ -779,10 +779,13 @@ def convert_frac(frac):
 
     expr_top = convert_expr(frac.upper)
     expr_bot = convert_expr(frac.lower)
+
     if expr_top.is_Matrix or expr_bot.is_Matrix:
         return sympy.MatMul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=False)
     else:
-        return sympy.Mul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=False)
+        # make evaluate `True` to simplify the expression.
+        # if `False`, 1 / cos(x)**2 can not be matched to a pattern.
+        return sympy.Mul(expr_top, sympy.Pow(expr_bot, -1, evaluate=False), evaluate=True)
 
 
 def convert_binom(binom):
@@ -1129,7 +1132,7 @@ def latex2latex(tex):
     if isinstance(result, list) or isinstance(result, tuple) or isinstance(result, dict):
         return latex(result)
     else:
-        return latex(simplify(result.subs(variances).doit().doit()))
+        return latex(simplify(result.subs(latex2sympy2_variances).doit().doit()))
 
 
 # Set image value
@@ -1140,9 +1143,9 @@ for i in range(1, 10):
     lh = sympy.Symbol(r'\bm{I}_' + str(i), real=False)
     lh_m = sympy.MatrixSymbol(r'\bm{I}_' + str(i), i, i)
     rh = sympy.Identity(i).as_mutable()
-    variances[lh] = rh
-    variances[lh_m] = rh
-    var[str(lh)] = rh
+    latex2sympy2_variances[lh] = rh
+    latex2sympy2_variances[lh_m] = rh
+    latex2sympy2_var[str(lh)] = rh
 
 if __name__ == '__main__':
     # latex2latex(r'A_1=\begin{bmatrix}1 & 2 & 3 & 4 \\ 5 & 6 & 7 & 8\end{bmatrix}')
