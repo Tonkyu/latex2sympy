@@ -857,9 +857,9 @@ def convert_func(func):
                     base = convert_atom(func.subexpr().atom())
                 else:
                     base = convert_expr(func.subexpr().expr())
+                expr = sympy.log(arg, base, evaluate=False)
             else: # the base of the `log` and `ln` are both `e`.
-                base = sympy.E
-            expr = sympy.log(arg, base, evaluate=False)
+                expr = sympy.log(arg, evaluate=False)
         elif name in ["exp", "exponentialE"]:
             expr = sympy.exp(arg)
         elif name == "floor":
